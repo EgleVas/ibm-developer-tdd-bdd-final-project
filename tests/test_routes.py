@@ -195,6 +195,17 @@ class TestProductRoutes(TestCase):
         updated_product = response.get_json()
         self.assertEqual(updated_product["description"], "unknown")
 
+    def test_update_product_not_found(self):
+        """It should not Update a Product thats not found"""
+        test_product = ProductFactory()
+        response = self.client.post(BASE_URL, json=test_product.serialize())
+        new_product = response.get_json()
+        new_product["description"] = "unknown"
+        response = self.client.put(f"{BASE_URL}/0", json=new_product)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        updated_product = response.get_json()
+        self.assertIn("was not found", updated_product["message"])
+
     def test_delete_product(self):
         """It should Delete a Product"""
         products = self._create_products(5)
